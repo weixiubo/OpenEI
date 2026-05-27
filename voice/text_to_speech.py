@@ -80,7 +80,7 @@ class TextToSpeech:
                 params={
                     "tex": text[:2048],
                     "tok": token,
-                    "cuid": "dance_robot",
+                    "cuid": "openei",
                     "ctp": 1,
                     "lan": "zh",
                     "spd": 5,

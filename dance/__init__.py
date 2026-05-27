@@ -1,12 +1,8 @@
 """
-舞蹈控制模块
+历史机器人控制兼容包。
 
-提供动作库管理、机器人控制、串口驱动等功能。
+该目录名保持不变，用于兼容既有导入路径。
 """
-
-from .action_library import ActionLibrary, DanceAction
-from .robot_controller import RobotController
-from .serial_driver import SerialDriver
 
 __all__ = [
     "ActionLibrary",
@@ -14,3 +10,19 @@ __all__ = [
     "RobotController",
     "SerialDriver",
 ]
+
+
+def __getattr__(name):
+    if name in {"ActionLibrary", "DanceAction"}:
+        from .action_library import ActionLibrary, DanceAction
+
+        return {"ActionLibrary": ActionLibrary, "DanceAction": DanceAction}[name]
+    if name == "RobotController":
+        from .robot_controller import RobotController
+
+        return RobotController
+    if name == "SerialDriver":
+        from .serial_driver import SerialDriver
+
+        return SerialDriver
+    raise AttributeError(name)

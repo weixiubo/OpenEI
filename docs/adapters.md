@@ -1,0 +1,57 @@
+# 机器人适配器
+
+`RobotAdapter` 是 OpenEI 与机器人硬件之间的边界。运行时只依赖这个接口，不直接依赖具体串口、网口或控制板实现。
+
+## 接口约定
+
+适配器需要实现：
+
+```python
+class RobotAdapter:
+    def connect(self) -> bool:
+        ...
+
+    def status(self) -> RobotStatus:
+        ...
+
+    def execute_skill(self, skill: Skill, task: Task) -> ExecutionResult:
+        ...
+
+    def stop(self) -> None:
+        ...
+
+    def close(self) -> None:
+        ...
+```
+
+## 内置适配器
+
+### SimRobotAdapter
+
+模拟适配器用于无硬件快速验证：
+
+- 不连接真实机器人。
+- 不等待真实动作完成。
+- 输出技能名、控制序号、预计耗时和任务目标。
+- 适合作为新用户第一入口和持续集成测试入口。
+
+### SerialRobotAdapter
+
+串口适配器包装当前已有串口控制逻辑：
+
+- 复用 `dance.serial_driver.SerialDriver`。
+- 从技能 `metadata["seq"]` 读取控制板动作序号。
+- 通过 `send_action_command(seq)` 下发到底层控制板。
+- 保留自动检测、真实模式、模拟模式等现有行为。
+
+## 新机器人接入建议
+
+1. 先写一个只打印日志的模拟适配器，确认任务和技能规划可用。
+2. 再实现真实连接逻辑，例如串口、网口、蓝牙或控制 SDK。
+3. 把硬件动作编号、速度、角度、关节限制写到技能 `metadata`。
+4. 在 `execute_skill` 中做参数校验和失败返回，不要让异常穿透运行时。
+5. 为适配器补单元测试，至少覆盖连接、状态、执行成功、执行失败和关闭。
+
+## 适配器边界
+
+适配器只处理硬件差异，不负责理解自然语言，也不负责决定任务目标。这样换机器人时不用重写感知层和任务层。

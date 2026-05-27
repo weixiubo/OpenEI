@@ -61,8 +61,8 @@ class DanceConfig:
     servo: ServoConfig = None
     choreography: ChoreographyConfig = None
     actions_file: str = "data/actions.csv"
-    dance_stop_commands: tuple[str, ...] = ("停止跳舞", "不跳了", "停止舞蹈")
-    dance_list_commands: tuple[str, ...] = ("舞蹈列表", "有什么舞蹈", "动作列表")
+    dance_stop_commands: tuple[str, ...] = ("停止执行", "停止任务", "停止跳舞", "不跳了", "停止舞蹈")
+    dance_list_commands: tuple[str, ...] = ("技能列表", "能力列表", "动作列表", "舞蹈列表", "有什么舞蹈")
 
     def __post_init__(self) -> None:
         self.servo = ServoConfig()

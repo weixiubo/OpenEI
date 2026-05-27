@@ -86,7 +86,7 @@ class SpeechRecognizer:
                     "format": "pcm",
                     "rate": sample_rate,
                     "channel": 1,
-                    "cuid": "dance_robot",
+                    "cuid": "openei",
                     "token": token,
                     "speech": base64.b64encode(audio_data).decode("utf-8"),
                     "len": len(audio_data),

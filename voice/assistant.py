@@ -108,7 +108,7 @@ class VoiceAssistant:
 
     def _get_ai_response(self, text: str) -> str:
         if not self.ai_client:
-            return "我现在优先负责跳舞演示，你可以直接说跳舞命令。"
+            return "我现在优先负责具身任务演示，你可以直接说执行命令。"
 
         try:
             self.conversation_history.append({"role": "user", "content": text})
@@ -117,7 +117,7 @@ class VoiceAssistant:
                 {
                     "role": "system",
                     "content": (
-                        "你是智能舞蹈机器人的现场演示语音助手。"
+                        "你是 OpenEI 具身机器人运行时的现场演示语音助手。"
                         "回答要简洁、稳定、友好，控制在 80 字以内。"
                     ),
                 }
@@ -133,7 +133,7 @@ class VoiceAssistant:
             return reply
         except Exception as exc:
             logger.error(f"AI 对话失败: {exc}")
-            return "AI 对话暂时不可用，你可以继续下达跳舞命令。"
+            return "AI 对话暂时不可用，你可以继续下达执行命令。"
 
     def run_voice_chat(self) -> None:
         if not self.recorder.is_available:

@@ -1,7 +1,7 @@
 """
-智能编舞器
+技能序列调度器
 
-基于音乐特征和马尔可夫链的舞蹈动作编排系统。
+基于感知特征和马尔可夫链的连续动作序列调度系统。
 """
 
 import random
@@ -19,7 +19,7 @@ from .music_analyzer import MusicFeatures
 
 @dataclass
 class ChoreographyPlan:
-    """编舞计划"""
+    """技能序列计划"""
     actions: List[str] = field(default_factory=list)       # 动作序列
     beat_targets: List[int] = field(default_factory=list)  # 每个动作的目标节拍
     total_beats: int = 0                                   # 总节拍数
@@ -81,17 +81,17 @@ class MarkovChain:
 
 class Choreographer:
     """
-    智能编舞器
-    
+    技能序列调度器
+
     功能：
-    - 根据音乐特征选择合适的动作
+    - 根据感知特征选择合适的动作
     - 使用马尔可夫链保证动作连贯性
     - 考虑节拍对齐和动作多样性
     """
     
     def __init__(self, action_library=None, beat_tracker: BeatTracker = None):
         """
-        初始化编舞器
+        初始化技能序列调度器
         
         Args:
             action_library: 动作库实例
@@ -119,20 +119,20 @@ class Choreographer:
             self._initialize(action_library)
     
     def _initialize(self, action_library) -> None:
-        """初始化编舞器"""
+        """初始化技能序列调度器"""
         self.action_library = action_library
         self.markov_chain.build_from_actions(action_library.get_all_actions())
-        logger.info(f"编舞器初始化完成，动作库: {len(action_library.get_all_actions())}个动作")
+        logger.info(f"技能序列调度器初始化完成，动作库: {len(action_library.get_all_actions())}个动作")
     
     def set_action_library(self, action_library) -> None:
         """设置动作库"""
         self._initialize(action_library)
     
     def reset(self) -> None:
-        """重置编舞器状态"""
+        """重置技能序列调度器状态"""
         self.current_action = None
         self.action_history.clear()
-        logger.debug("编舞器状态已重置")
+        logger.debug("技能序列调度器状态已重置")
     
     def select_action(
         self,
@@ -424,7 +424,7 @@ class Choreographer:
                 "side": "侧移动作",
                 "gesture": "手势动作",
                 "combo": "组合动作",
-                "dance": "舞蹈动作",
+                "dance": "综合动作",
                 "left": "左移动作",
                 "right": "右移动作",
             }
@@ -437,7 +437,7 @@ class Choreographer:
         return "，".join(reasons) if reasons else "综合评分最优"
     
     def get_status(self) -> dict:
-        """获取编舞器状态"""
+        """获取技能序列调度器状态"""
         return {
             "current_action": self.current_action,
             "history_length": len(self.action_history),

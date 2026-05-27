@@ -90,3 +90,26 @@ def test_robot_controller_cancels_pending_command(monkeypatch):
     assert controller.handle_voice_command("跳舞50秒") is True
     assert controller.handle_voice_command("取消") is True
     assert "取消" in controller.pop_feedback_message()
+
+
+def test_generic_runtime_commands_remain_supported(monkeypatch):
+    from dance.robot_controller import RobotController
+
+    controller = RobotController(
+        profile_config=build_runtime_profile(
+            RuntimeProfile.DEV,
+            TransportMode.SIM,
+            RecordingMode.SMART_VAD,
+        )
+    )
+    called = {}
+    monkeypatch.setattr(controller, "stop_dance", lambda: called.setdefault("stopped", True))
+
+    assert controller.handle_voice_command("技能列表") is True
+    assert "当前可用动作" in controller.pop_feedback_message()
+
+    assert controller.handle_voice_command("运行状态") is True
+    assert "机器人当前处于" in controller.pop_feedback_message()
+
+    assert controller.handle_voice_command("停止执行") is True
+    assert called["stopped"] is True

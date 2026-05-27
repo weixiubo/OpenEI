@@ -57,7 +57,7 @@ def build_runtime_profile(
             confirm_dance_commands=True,
             confirm_high_risk_only=False,
             allow_cloud_fallback=True,
-            startup_greeting="智能舞蹈机器人已就绪。",
+            startup_greeting="OpenEI 具身任务运行时已就绪。",
             show_status_panel=True,
         )
 
@@ -69,6 +69,6 @@ def build_runtime_profile(
         confirm_dance_commands=False,
         confirm_high_risk_only=True,
         allow_cloud_fallback=True,
-        startup_greeting="语音助手已启动。",
+        startup_greeting="OpenEI 语音交互运行时已启动。",
         show_status_panel=True,
     )

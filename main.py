@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-智能语音舞蹈机器人入口。
+OpenEI 具身任务运行时入口。
 """
 
 from __future__ import annotations
@@ -24,7 +24,7 @@ from voice import VoiceAssistant
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="智能舞蹈机器人")
+    parser = argparse.ArgumentParser(description="OpenEI 具身任务运行时")
     parser.add_argument(
         "--profile",
         choices=[item.value for item in RuntimeProfile],

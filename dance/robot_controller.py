@@ -34,7 +34,7 @@ class PendingVoiceAction:
 
 
 class RobotController:
-    """统一舞蹈控制入口。"""
+    """历史兼容的机器人控制入口。"""
 
     def __init__(
         self,
@@ -126,11 +126,11 @@ class RobotController:
 
     def start_dance(self, duration_seconds: int) -> bool:
         if self.is_dancing:
-            self._set_feedback("机器人正在跳舞中，请稍后再试。")
+            self._set_feedback("机器人正在执行任务，请稍后再试。")
             return False
 
         if duration_seconds < 5 or duration_seconds > 60:
-            self._set_feedback("跳舞时长必须在 5 到 60 秒之间。")
+            self._set_feedback("任务执行时长必须在 5 到 60 秒之间。")
             return False
 
         self.stop_event.clear()
@@ -149,12 +149,12 @@ class RobotController:
         )
         self.dance_thread.start()
         mode = self.serial_driver.get_status()["mode"]
-        self._set_feedback(f"开始跳舞 {duration_seconds} 秒，当前模式为 {mode}。")
+        self._set_feedback(f"开始执行任务 {duration_seconds} 秒，当前模式为 {mode}。")
         return True
 
     def stop_dance(self) -> None:
         if not self.is_dancing:
-            self._set_feedback("当前没有正在执行的舞蹈。")
+            self._set_feedback("当前没有正在执行的任务。")
             return
 
         self.stop_event.set()
@@ -163,7 +163,7 @@ class RobotController:
         self.is_dancing = False
         if self.voice_assistant:
             self.voice_assistant.set_dance_mode(False)
-        self._set_feedback("已停止跳舞。")
+        self._set_feedback("已停止当前任务。")
 
     def _dance_loop(self, duration_seconds: int) -> None:
         self.is_dancing = True
@@ -249,7 +249,7 @@ class RobotController:
             self._set_feedback(f"未找到动作 {action_label}。")
             return False
         if self.is_dancing:
-            self._set_feedback("机器人正在跳舞中，无法执行单个动作。")
+            self._set_feedback("机器人正在执行任务，无法执行单个动作。")
             return False
         ok = self.serial_driver.send_action_command(action.seq)
         if ok:
@@ -280,7 +280,7 @@ class RobotController:
     def get_status_summary(self) -> str:
         status = self.get_status()
         mode = status["serial"]["mode"]
-        state = "跳舞中" if status["is_dancing"] else "待机"
+        state = "任务执行中" if status["is_dancing"] else "待机"
         pending = (
             f"，等待确认：{status['pending_confirmation']}"
             if status["pending_confirmation"]
@@ -324,14 +324,14 @@ class RobotController:
 
         if intent.kind == VoiceIntentType.DANCE:
             if intent.duration_seconds is None:
-                self._set_feedback("请说“跳舞 10 秒”这样的命令。")
+                self._set_feedback("请说“执行 10 秒”这样的命令。")
                 return True
             if intent.duration_seconds < 5 or intent.duration_seconds > 60:
-                self._set_feedback("跳舞时长超出范围，请说 5 到 60 秒。")
+                self._set_feedback("任务时长超出范围，请说 5 到 60 秒。")
                 return True
             if intent.requires_confirmation:
                 self.pending_confirmation = PendingVoiceAction(intent=intent, created_at=time.time())
-                self._set_feedback(f"请确认，是否执行跳舞 {intent.duration_seconds} 秒？")
+                self._set_feedback(f"请确认，是否执行任务 {intent.duration_seconds} 秒？")
                 return True
             return self.start_dance(intent.duration_seconds)
 

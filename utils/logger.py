@@ -130,7 +130,7 @@ _log_file = settings.logs_dir / "runtime.log" if settings.log_to_file else None
 
 # 全局日志器
 logger = setup_logger(
-    "dance_robot",
+    "openei",
     level=_resolved_level,
     log_to_file=settings.log_to_file,
     log_file=_log_file,
