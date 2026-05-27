@@ -42,6 +42,34 @@ registry.register(
 )
 ```
 
+## 声明式技能包
+
+技能包使用 `skill.yaml` 声明。当前实现采用 JSON 兼容 YAML 子集，避免默认引入额外依赖：
+
+```json
+{
+  "name": "my-skills",
+  "version": "0.1.0",
+  "skills": [
+    {
+      "name": "motion.wave",
+      "description": "让机器人挥手",
+      "duration_seconds": 2.0,
+      "tags": ["robot-motion", "gesture"],
+      "risk_level": "low",
+      "metadata": {"seq": "009"}
+    }
+  ]
+}
+```
+
+校验和查看：
+
+```bash
+python -m openei skill validate skill_packages/base_motion
+python -m openei skill list --package skill_packages/base_motion
+```
+
 ## 默认技能包
 
 当前默认技能包来自 `data/actions.csv`。每一行动作元数据会被包装为一个 `Skill`：
@@ -50,7 +78,7 @@ registry.register(
 - `time_ms` 转成 `duration_seconds`，供规划器估算时长。
 - `type`、`energy` 写入 `tags`，供后续任务匹配扩展。
 
-这样既保留原控制板动作编号，又能把历史动作库迁移进通用技能系统。
+这样既保留原控制板动作编号，又能把历史动作库迁移进通用技能系统。仓库还提供 `skill_packages/` 下的官方技能包样例，用于演示生态化扩展方式。
 
 ## 匹配策略
 

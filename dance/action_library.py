@@ -1,7 +1,7 @@
 """
-舞蹈动作库管理器
+机器人动作库管理器
 
-负责加载、管理和查询舞蹈动作。
+负责加载、管理和查询机器人动作技能。
 """
 
 import csv
@@ -16,7 +16,7 @@ from utils.logger import logger
 @dataclass
 class DanceAction:
     """
-    舞蹈动作数据类
+    机器人动作数据类
     
     Attributes:
         seq: 舵机控制板中的动作编号
@@ -48,7 +48,7 @@ class DanceAction:
 
 class ActionLibrary:
     """
-    舞蹈动作库管理器
+    机器人动作库管理器
     
     功能：
     - 从 CSV 文件加载动作

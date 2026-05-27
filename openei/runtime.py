@@ -5,16 +5,20 @@ OpenEI lightweight embodied agent runtime.
 from __future__ import annotations
 
 import time
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import List, Optional
 
 from config import TransportMode
-from utils.helpers import extract_duration_from_text
 
 from .adapters import RobotAdapter, SerialRobotAdapter, SimRobotAdapter
+from .audit import AuditLogger
 from .default_skills import build_default_registry
-from .models import ExecutionResult, PerceptionEvent, RiskLevel, Task, TaskStatus
+from .events import PerceptionEvent
+from .planning import RecoveryPolicy, RulePlanner, SkillPlan
+from .providers import ModelProvider, RuleModelProvider
+from .results import ExecutionResult
 from .skills import Skill, SkillRegistry
+from .tasks import Task, TaskStatus
 
 
 @dataclass
@@ -25,14 +29,27 @@ class RuntimeReport:
     task: Task
     skills: List[Skill]
     result: ExecutionResult
+    warnings: List[str] = field(default_factory=list)
 
 
 class OpenEIRuntime:
     """Input event -> task -> skill plan -> adapter execution."""
 
-    def __init__(self, registry: SkillRegistry, adapter: RobotAdapter) -> None:
+    def __init__(
+        self,
+        registry: SkillRegistry,
+        adapter: RobotAdapter,
+        provider: Optional[ModelProvider] = None,
+        planner: Optional[RulePlanner] = None,
+        recovery: Optional[RecoveryPolicy] = None,
+        audit_logger: Optional[AuditLogger] = None,
+    ) -> None:
         self.registry = registry
         self.adapter = adapter
+        self.provider = provider or RuleModelProvider()
+        self.planner = planner or RulePlanner(registry)
+        self.recovery = recovery or RecoveryPolicy()
+        self.audit_logger = audit_logger or AuditLogger()
 
     @classmethod
     def from_defaults(
@@ -40,6 +57,8 @@ class OpenEIRuntime:
         sim: bool = True,
         actions_file: Optional[str] = None,
         transport: TransportMode = TransportMode.AUTO,
+        audit_path: str = "logs/openei_audit.jsonl",
+        audit_enabled: bool = True,
     ) -> "OpenEIRuntime":
         registry = build_default_registry(actions_file)
         adapter: RobotAdapter
@@ -48,116 +67,94 @@ class OpenEIRuntime:
         else:
             adapter = SerialRobotAdapter(transport=transport)
         adapter.connect()
-        return cls(registry=registry, adapter=adapter)
+        return cls(
+            registry=registry,
+            adapter=adapter,
+            audit_logger=AuditLogger(audit_path, enabled=audit_enabled),
+        )
 
     def parse_event(self, event: PerceptionEvent) -> Task:
-        text = str(event.content).strip()
-        duration_seconds = extract_duration_from_text(text)
-        if duration_seconds is None:
-            duration_seconds = int(event.metadata.get("duration_seconds", 10))
-
-        risk_level = RiskLevel.LOW
-        if duration_seconds > 30:
-            risk_level = RiskLevel.MEDIUM
-        if duration_seconds > 60:
-            risk_level = RiskLevel.HIGH
-
-        return Task(
-            goal=text or "执行机器人任务",
-            parameters={
-                "duration_seconds": duration_seconds,
-                "tags": ["robot-motion"],
-            },
-            constraints={
-                "max_duration_seconds": duration_seconds,
-                "requires_hardware": False,
-            },
-            risk_level=risk_level,
-            source=event.source,
-        )
+        task = self.provider.parse_event(event)
+        self.audit_logger.write("task.parsed", {"event": event, "task": task})
+        return task
 
     def plan(self, task: Task) -> List[Skill]:
-        duration_limit = float(task.parameters.get("duration_seconds", 10))
-        matched = self.registry.match(task)
-        if not matched:
-            task.mark(TaskStatus.FAILED)
-            return []
+        plan = self.build_plan(task)
+        return plan.skills
 
-        stand_skill = self.registry.get("motion.立正")
-        candidates = [
-            skill
-            for skill in matched
-            if skill.name != "motion.立正" and skill.duration_seconds <= duration_limit
-        ]
-        candidates.sort(
-            key=lambda item: (
-                1 if item.metadata.get("legacy_type") == "dance" else 0,
-                item.duration_seconds,
-                item.name,
-            )
+    def build_plan(self, task: Task) -> SkillPlan:
+        plan = self.planner.plan(task)
+        self.audit_logger.write(
+            "task.planned",
+            {
+                "task": task,
+                "skills": [skill.name for skill in plan.skills],
+                "warnings": plan.warnings,
+            },
         )
-
-        selected: List[Skill] = []
-        elapsed = 0.0
-        for skill in candidates:
-            if elapsed + skill.duration_seconds > duration_limit:
-                continue
-            selected.append(skill)
-            elapsed += skill.duration_seconds
-            if elapsed >= duration_limit * 0.65:
-                break
-
-        if not selected:
-            shortest = matched[0]
-            selected.append(shortest)
-            elapsed += shortest.duration_seconds
-
-        if stand_skill and selected[-1].name != stand_skill.name:
-            selected.append(stand_skill)
-
-        task.mark(TaskStatus.PLANNED)
-        return selected
+        return plan
 
     def execute(self, task: Task, skills: List[Skill]) -> ExecutionResult:
         if not skills:
             task.mark(TaskStatus.FAILED)
-            return ExecutionResult(
-                success=False,
-                message="没有匹配到可执行技能",
-                error="empty plan",
-            )
+            result = ExecutionResult(False, "没有匹配到可执行技能", error="empty plan")
+            self.audit_logger.write("task.failed", {"task": task, "result": result})
+            return result
 
         task.mark(TaskStatus.RUNNING)
         started_at = time.perf_counter()
         trace: List[str] = []
 
+        self.audit_logger.write("task.started", {"task": task, "adapter": self.adapter.status()})
         for index, skill in enumerate(skills, start=1):
             trace.append(f"[计划] 第 {index} 步: {skill.name}")
+            self.audit_logger.write("skill.started", {"task": task, "skill": skill.name})
             result = self.adapter.execute_skill(skill, task)
             trace.extend(result.trace)
             if not result.success:
                 task.mark(TaskStatus.FAILED)
-                return ExecutionResult(
+                recovery_actions = self.recovery.decide(task, skill, result.error or result.message)
+                if "fallback_to_safe_stop" in recovery_actions or "stop" in recovery_actions:
+                    self.adapter.emergency_stop()
+                failed = ExecutionResult(
                     success=False,
                     message=f"技能执行失败: {skill.name}",
                     elapsed_seconds=time.perf_counter() - started_at,
                     trace=trace,
                     error=result.error or result.message,
+                    recovery_actions=recovery_actions,
                 )
+                self.audit_logger.write(
+                    "task.failed",
+                    {"task": task, "skill": skill.name, "result": failed},
+                )
+                return failed
+            self.audit_logger.write("skill.finished", {"task": task, "skill": skill.name, "result": result})
 
         task.mark(TaskStatus.SUCCEEDED)
-        return ExecutionResult(
+        final = ExecutionResult(
             success=True,
             message="任务已完成",
             elapsed_seconds=time.perf_counter() - started_at,
             trace=trace,
         )
+        self.audit_logger.write("task.succeeded", {"task": task, "result": final})
+        return final
 
     def run_event(self, event: PerceptionEvent) -> RuntimeReport:
         task = self.parse_event(event)
-        skills = self.plan(task)
-        result = self.execute(task, skills)
-        return RuntimeReport(event=event, task=task, skills=skills, result=result)
+        plan = self.build_plan(task)
+        result = self.execute(task, plan.skills)
+        return RuntimeReport(
+            event=event,
+            task=task,
+            skills=plan.skills,
+            result=result,
+            warnings=plan.warnings,
+        )
 
     def run_text(self, text: str, source: str = "cli") -> RuntimeReport:
         return self.run_event(PerceptionEvent.text(text, source=source))
+
+    def run_image(self, image_path: str, task: str = "根据画面执行安全动作") -> RuntimeReport:
+        return self.run_event(PerceptionEvent.image(image_path, prompt=task, source="cli"))

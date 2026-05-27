@@ -70,7 +70,7 @@ class VoiceAssistant:
             self.recorder.pause()
         else:
             self.recorder.resume()
-        logger.info("舞蹈模式切换: %s", "on" if enabled else "off")
+        logger.info("任务执行模式切换: %s", "on" if enabled else "off")
 
     def speak_feedback(self, text: str) -> None:
         if not text:

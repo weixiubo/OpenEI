@@ -1,0 +1,25 @@
+{
+  "name": "gesture-pack",
+  "version": "0.1.0",
+  "description": "面向交互展示的手势技能包",
+  "skills": [
+    {
+      "name": "gesture.wave_left",
+      "description": "向左侧挥手回应用户",
+      "duration_seconds": 4.0,
+      "tags": ["robot-motion", "gesture"],
+      "risk_level": "low",
+      "adapter_requirements": ["any"],
+      "metadata": {"seq": "000", "category": "gesture"}
+    },
+    {
+      "name": "gesture.heart",
+      "description": "执行比心类手势动作",
+      "duration_seconds": 5.8,
+      "tags": ["robot-motion", "gesture"],
+      "risk_level": "low",
+      "adapter_requirements": ["any"],
+      "metadata": {"seq": "006", "category": "gesture"}
+    }
+  ]
+}

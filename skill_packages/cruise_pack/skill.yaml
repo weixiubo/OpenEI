@@ -1,0 +1,16 @@
+{
+  "name": "cruise-pack",
+  "version": "0.1.0",
+  "description": "低成本机器人巡航与状态展示技能包",
+  "skills": [
+    {
+      "name": "cruise.scan_left_right",
+      "description": "左右观察环境并回到安全姿态",
+      "duration_seconds": 6.0,
+      "tags": ["robot-motion", "inspection", "sensor-trigger"],
+      "risk_level": "medium",
+      "adapter_requirements": ["any"],
+      "metadata": {"seq": "010", "category": "inspection"}
+    }
+  ]
+}

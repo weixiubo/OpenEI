@@ -1,5 +1,5 @@
 """
-舞蹈系统配置。
+机器人技能执行配置。
 """
 
 from __future__ import annotations

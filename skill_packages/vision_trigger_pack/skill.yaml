@@ -1,0 +1,16 @@
+{
+  "name": "vision-trigger-pack",
+  "version": "0.1.0",
+  "description": "视觉输入触发的安全动作技能包",
+  "skills": [
+    {
+      "name": "vision.safe_greeting",
+      "description": "根据画面触发安全问候动作",
+      "duration_seconds": 5.0,
+      "tags": ["robot-motion", "vision-trigger", "gesture"],
+      "risk_level": "low",
+      "adapter_requirements": ["any"],
+      "metadata": {"seq": "009", "category": "vision"}
+    }
+  ]
+}

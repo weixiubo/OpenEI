@@ -183,7 +183,7 @@ class Choreographer:
             if _filtered:
                 available_actions = _filtered
 
-        # 正常舞蹈动作选择流程中始终排除“立正”
+        # 正常技能序列选择流程中始终排除“立正”
         _stand_filtered = [a for a in available_actions if a.label != "立正"]
         if _stand_filtered:
             available_actions = _stand_filtered

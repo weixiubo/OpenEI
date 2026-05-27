@@ -1,6 +1,6 @@
 # OpenEI
 
-OpenEI 是面向低成本真实机器人的轻量级具身 Agent 运行时原型。它把文本、语音、音频、视觉、传感器等输入统一成任务事件，再经过任务解析、技能规划、执行调度和机器人适配器，变成真实或模拟机器人的身体能力调用。
+OpenEI 是面向低成本真实机器人的轻量级具身 Agent 运行时。它把文本、语音、音频、视觉、传感器等输入统一成任务事件，再经过模型解析、任务规划、技能调度、安全约束和机器人适配器，变成真实或模拟机器人的身体能力调用。
 
 一句话定位：OpenClaw 让 Agent 调用软件工具，OpenEI 让 Agent 调用真实机器人的身体能力。
 
@@ -16,13 +16,13 @@ flowchart LR
     H --> C
 ```
 
-## 五分钟模拟器
+## 五分钟闭环
 
 不需要 API key，不需要真实硬件，先跑完整闭环：
 
 ```bash
 pip install -r requirements.txt
-python -m openei.quickstart --task "执行 10 秒"
+python -m openei quickstart --task "执行 10 秒"
 ```
 
 示例输出：
@@ -31,13 +31,15 @@ python -m openei.quickstart --task "执行 10 秒"
 OpenEI 五分钟模拟器
 输入事件: text / 执行 10 秒
 任务目标: 执行 10 秒
+任务类型: motion
 任务状态: succeeded
+风险等级: low
 时长约束: 10 秒
 
 匹配技能:
   1. motion.挥左拳 (3.1 秒)
   2. motion.挥右拳 (3.6 秒)
-  3. motion.立正 (2.0 秒)
+  3. motion.safe_stand (2.0 秒)
 
 模拟执行日志:
   [计划] 第 1 步: motion.挥左拳
@@ -45,24 +47,47 @@ OpenEI 五分钟模拟器
   控制序号: 007
 ```
 
+接入串口机器人后，把适配器切到真实硬件：
+
+```bash
+SERIAL_PORT=/dev/ttyUSB0 python -m openei run --adapter serial --task "执行 10 秒"
+```
+
+视觉输入样例：
+
+```bash
+python -m openei quickstart --image examples/image_input/scene.jpg --task "根据画面执行安全动作"
+```
+
 ## 为什么不是传统机器人脚本
 
 传统脚本通常把“输入命令、动作编号、硬件通信”写成固定流程，换输入源、换模型、换机器人都要改主逻辑。OpenEI 的目标是把这几层拆开：
 
-- 输入层只负责产生 `PerceptionEvent`，后续可以接文本、语音、视觉或传感器。
-- 任务层把用户目标、参数、约束、风险等级和状态统一成 `Task`。
-- 技能层把机器人能力抽象成可注册、可查询、可模拟、可执行的 `Skill`。
-- 适配层用 `RobotAdapter` 屏蔽真实硬件、串口通信和模拟执行差异。
-- 运行时负责把事件转成任务，再把任务规划成技能序列并收集 `ExecutionResult`。
+- 输入层只负责产生 `PerceptionEvent`，支持文本、语音、音频、图像、视频和传感器。
+- 模型层通过 `ModelProvider` 把事件解析成 `Task`，默认规则模式不需要密钥。
+- 技能层把机器人能力抽象成可注册、可校验、可模拟、可执行的 `Skill`。
+- 适配层用 `RobotAdapter` 屏蔽模拟器、串口、HTTP、MQTT 和 ROS 2 差异。
+- 运行时负责规划、风险检查、执行、失败恢复和审计日志。
 
 ## 核心能力
 
-- 多模态接入：当前已有文本、语音和音频链路，框架层用统一事件承接后续视觉、传感器和多模型输入。
-- 任务中间表示：`Task` 记录目标、参数、约束、风险等级、来源、状态和创建时间。
-- 技能系统：`SkillRegistry` 支持技能注册、查询、标签匹配和默认技能包加载。
-- 执行运行时：`OpenEIRuntime` 实现 `输入事件 -> 任务解析 -> 技能规划 -> 适配器执行 -> 结果反馈`。
-- 硬件适配：内置 `SimRobotAdapter` 和 `SerialRobotAdapter`，无硬件可模拟，有硬件可复用现有串口控制逻辑。
+- 多模态接入：`openei.events` 统一文本、语音、音频、图像、视频和传感器事件。
+- 任务中间表示：`openei.tasks` 记录目标、类型、上下文、约束、风险等级、安全策略和期望结果。
+- 技能生态：`SkillRegistry` 支持默认 CSV、`skill.yaml` 技能包、校验、安装、运行。
+- 执行运行时：`OpenEIRuntime` 实现 `输入事件 -> 模型解析 -> 安全规划 -> 适配器执行 -> 审计日志`。
+- 硬件适配：内置模拟器、串口、HTTP、MQTT 和可选 ROS 2 适配器模板。
+- 可观测性：执行过程写入 JSONL 审计日志，支持失败恢复和后续回放。
 - 兼容旧工程：保留 `dance/` 历史目录名、CSV 技能元数据和原有语音命令，避免破坏已有演示和测试。
+
+## 统一命令行
+
+```bash
+python -m openei quickstart --task "执行 10 秒"
+python -m openei run --adapter sim --task "执行 10 秒"
+python -m openei skill list
+python -m openei skill validate skill_packages/base_motion
+python -m openei adapter create my_robot
+```
 
 ## 常规启动
 
@@ -102,6 +127,8 @@ python main.py --profile demo --transport auto --recording-mode smart_vad
 - `dance/`：历史命名保留的机器人技能库、控制器和串口驱动模块。
 - `voice/`：录音、语音识别、语音合成、意图解析和交互运行时。
 - `data/`：机器人技能元数据。
+- `skill_packages/`：官方技能包样例。
+- `examples/`：模拟器、图像输入、串口、HTTP、MQTT 和 ROS 2 模板。
 - `docs/`：架构、快速开始、技能开发、适配器开发和演示材料。
 - `tests/`：单元测试和回归测试。
 
@@ -111,11 +138,14 @@ python main.py --profile demo --transport auto --recording-mode smart_vad
 - [快速开始](docs/quickstart.md)
 - [技能开发](docs/skills.md)
 - [机器人适配器](docs/adapters.md)
+- [模型提供方](docs/model_providers.md)
+- [可观测性与审计](docs/observability.md)
+- [ROS 2 可选接入](docs/ros2.md)
 - [长期路线](ROADMAP.md)
 
 ## 工程建议
 
-- 新用户先跑 `python -m openei.quickstart --task "执行 10 秒"`，确认无硬件闭环可用。
+- 新用户先跑 `python -m openei quickstart --task "执行 10 秒"`，确认无硬件闭环可用。
 - 再用 `--transport sim` 验证完整语音和任务链路。
 - 接入真实机器人前，先检查串口权限、设备路径和供电状态。
 - 现场网络不稳定时，对话能力会降级为固定反馈，不影响任务执行主链路。

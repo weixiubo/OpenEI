@@ -1,0 +1,25 @@
+{
+  "name": "base-motion",
+  "version": "0.1.0",
+  "description": "低成本机器人基础运动技能包",
+  "skills": [
+    {
+      "name": "motion.safe_stand",
+      "description": "让机器人回到安全站立姿态",
+      "duration_seconds": 2.0,
+      "tags": ["robot-motion", "safe-stop", "stand"],
+      "risk_level": "low",
+      "adapter_requirements": ["any"],
+      "metadata": {"seq": "001", "category": "safety"}
+    },
+    {
+      "name": "motion.step_forward",
+      "description": "执行短距离前进动作",
+      "duration_seconds": 4.0,
+      "tags": ["robot-motion", "forward"],
+      "risk_level": "medium",
+      "adapter_requirements": ["any"],
+      "metadata": {"seq": "014", "category": "locomotion"}
+    }
+  ]
+}

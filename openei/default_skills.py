@@ -6,9 +6,10 @@ from __future__ import annotations
 
 from typing import Optional
 
+from config import settings
 from dance.action_library import ActionLibrary, DanceAction
 
-from .models import ExecutionResult
+from .results import ExecutionResult
 from .skills import Skill, SkillContext, SkillRegistry
 
 
@@ -41,6 +42,7 @@ def create_action_skill(action: DanceAction) -> Skill:
         preconditions=["机器人已连接或模拟器已启动"],
         duration_seconds=action.duration_seconds,
         tags=["robot-motion", action.type, action.energy],
+        adapter_requirements=["any"],
         metadata={
             "seq": action.seq,
             "label": action.label,
@@ -57,4 +59,11 @@ def build_default_registry(actions_file: Optional[str] = None) -> SkillRegistry:
     library = ActionLibrary(actions_file)
     for action in library.get_all_actions():
         registry.register(create_action_skill(action))
+    packages_root = settings.project_root / "skill_packages"
+    if packages_root.exists():
+        for manifest in sorted(packages_root.glob("*/skill.yaml")):
+            try:
+                registry.load_package(manifest)
+            except ValueError:
+                continue
     return registry

@@ -226,7 +226,7 @@ class RobotController:
                 self.serial_driver.send_action_command(action_data["seq"])
                 time.sleep(action_data["time"] / 1000)
 
-            logger.info("舞蹈主循环结束，开始强制归位立正")
+            logger.info("任务执行主循环结束，开始强制归位立正")
             stand_action = self.action_library.get_action("立正")
             if stand_action:
                 last_action = self.choreographer.action_history[-1] if self.choreographer.action_history else None
@@ -241,7 +241,7 @@ class RobotController:
             self.is_dancing = False
             if self.voice_assistant:
                 self.voice_assistant.set_dance_mode(False)
-            logger.info("跳舞流程结束")
+            logger.info("任务执行流程结束")
 
     def execute_single_action(self, action_label: str) -> bool:
         action = self.action_library.get_action(action_label)

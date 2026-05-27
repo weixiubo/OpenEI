@@ -24,6 +24,12 @@ class RobotAdapter:
         ...
 ```
 
+适配器还可以覆盖：
+
+- `discover_capabilities()`
+- `health_check()`
+- `emergency_stop()`
+
 ## 内置适配器
 
 ### SimRobotAdapter
@@ -43,6 +49,26 @@ class RobotAdapter:
 - 从技能 `metadata["seq"]` 读取控制板动作序号。
 - 通过 `send_action_command(seq)` 下发到底层控制板。
 - 保留自动检测、真实模式、模拟模式等现有行为。
+
+### HttpRobotAdapter
+
+用于接入提供 REST 接口的低成本控制器。开发阶段可以使用 `mock://robot`：
+
+```bash
+python -m openei run --adapter http --url mock://robot --task "执行 5 秒"
+```
+
+### MqttRobotAdapter
+
+用于接入 MQTT 控制板或远程机器人。开发阶段可以使用 `mock://local`：
+
+```bash
+python -m openei run --adapter mqtt --broker mock://local --task "执行 5 秒"
+```
+
+### Ros2RobotAdapter
+
+ROS 2 不作为默认依赖，但保留可选适配器模板。详见 [ROS 2 可选接入](ros2.md)。
 
 ## 新机器人接入建议
 
