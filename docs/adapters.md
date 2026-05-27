@@ -70,6 +70,19 @@ python -m openei run --adapter mqtt --broker mock://local --task "执行 5 秒"
 
 ROS 2 通过可选适配器模板接入。详见 [ROS 2 可选接入](ros2.md)。
 
+## 契约测试
+
+适配器契约测试会检查连接、状态、能力发现、技能执行、急停和关闭流程：
+
+```bash
+python -m openei adapter test --adapter sim
+python -m openei adapter test --adapter http --url mock://robot
+python -m openei adapter test --adapter mqtt --broker mock://local
+python -m openei adapter test --adapter serial
+```
+
+串口契约测试使用模拟驱动，不依赖真实串口设备。
+
 ## 新机器人接入建议
 
 1. 先写一个只打印日志的模拟适配器，确认任务和技能规划可用。

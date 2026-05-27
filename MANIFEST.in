@@ -1,5 +1,7 @@
 include README.md
 include ROADMAP.md
+include CHANGELOG.md
+include robot.yaml
 include requirements.txt
 recursive-include data *.csv
 recursive-include skill_packages skill.yaml

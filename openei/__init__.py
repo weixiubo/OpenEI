@@ -1,8 +1,8 @@
 """
 OpenEI framework layer.
 
-This package provides the lightweight embodied agent runtime used by the
-quickstart simulator and future hardware adapters.
+This package provides the lightweight embodied agent runtime for simulation,
+hardware adapters, skills, task execution, and audit replay.
 """
 
 from .adapters import (
@@ -16,17 +16,28 @@ from .adapters import (
     SimRobotAdapter,
 )
 from .audit import AuditLogger, replay_events
+from .contracts import ContractCheck, ContractReport, run_adapter_contract
 from .events import Modality, PerceptionEvent
 from .planning import RecoveryPolicy, RulePlanner, SafetyEvaluator, SkillPlan
-from .providers import CloudModelProvider, LocalModelProvider, ModelProvider, RuleModelProvider
+from .providers import (
+    CloudModelProvider,
+    LocalModelProvider,
+    ModelProvider,
+    OpenAICompatibleModelProvider,
+    RuleModelProvider,
+)
+from .replay import print_replay, summarize_replay
 from .results import ExecutionResult, ExecutionStep
 from .runtime import OpenEIRuntime, RuntimeReport
+from .robots import RobotAdapterSpec, RobotLimits, RobotProfile, load_robot_profile, validate_robot_profile
 from .skills import Skill, SkillContext, SkillPackage, SkillRegistry, load_skill_package
 from .tasks import RiskLevel, SafetyPolicy, Task, TaskStatus, TaskType
 
 __all__ = [
     "AuditLogger",
     "CloudModelProvider",
+    "ContractCheck",
+    "ContractReport",
     "ExecutionResult",
     "ExecutionStep",
     "HttpRobotAdapter",
@@ -35,11 +46,15 @@ __all__ = [
     "ModelProvider",
     "MqttRobotAdapter",
     "OpenEIRuntime",
+    "OpenAICompatibleModelProvider",
     "PerceptionEvent",
     "RecoveryPolicy",
     "RiskLevel",
     "RobotAdapter",
+    "RobotAdapterSpec",
     "RobotCapability",
+    "RobotLimits",
+    "RobotProfile",
     "RobotStatus",
     "Ros2RobotAdapter",
     "RuleModelProvider",
@@ -58,5 +73,10 @@ __all__ = [
     "TaskStatus",
     "TaskType",
     "load_skill_package",
+    "load_robot_profile",
+    "print_replay",
+    "run_adapter_contract",
     "replay_events",
+    "summarize_replay",
+    "validate_robot_profile",
 ]

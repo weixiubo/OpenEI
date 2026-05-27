@@ -6,6 +6,7 @@ from __future__ import annotations
 
 import time
 from dataclasses import dataclass, field
+from pathlib import Path
 from typing import List, Optional
 
 from config import TransportMode
@@ -17,6 +18,7 @@ from .events import PerceptionEvent
 from .planning import RecoveryPolicy, RulePlanner, SkillPlan
 from .providers import ModelProvider, RuleModelProvider
 from .results import ExecutionResult
+from .robots import RobotProfile, load_robot_profile
 from .skills import Skill, SkillRegistry
 from .tasks import Task, TaskStatus
 
@@ -43,11 +45,13 @@ class OpenEIRuntime:
         planner: Optional[RulePlanner] = None,
         recovery: Optional[RecoveryPolicy] = None,
         audit_logger: Optional[AuditLogger] = None,
+        robot_profile: Optional[RobotProfile] = None,
     ) -> None:
         self.registry = registry
         self.adapter = adapter
         self.provider = provider or RuleModelProvider()
-        self.planner = planner or RulePlanner(registry)
+        self.robot_profile = robot_profile
+        self.planner = planner or RulePlanner(registry, robot_profile=robot_profile)
         self.recovery = recovery or RecoveryPolicy()
         self.audit_logger = audit_logger or AuditLogger()
 
@@ -59,6 +63,7 @@ class OpenEIRuntime:
         transport: TransportMode = TransportMode.AUTO,
         audit_path: str = "logs/openei_audit.jsonl",
         audit_enabled: bool = True,
+        robot_profile_path: Optional[str] = "robot.yaml",
     ) -> "OpenEIRuntime":
         registry = build_default_registry(actions_file)
         adapter: RobotAdapter
@@ -67,10 +72,16 @@ class OpenEIRuntime:
         else:
             adapter = SerialRobotAdapter(transport=transport)
         adapter.connect()
+        robot_profile = (
+            load_robot_profile(robot_profile_path)
+            if robot_profile_path and Path(robot_profile_path).exists()
+            else None
+        )
         return cls(
             registry=registry,
             adapter=adapter,
             audit_logger=AuditLogger(audit_path, enabled=audit_enabled),
+            robot_profile=robot_profile,
         )
 
     def parse_event(self, event: PerceptionEvent) -> Task:

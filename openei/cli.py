@@ -11,10 +11,20 @@ from pathlib import Path
 from typing import Iterable, Optional
 
 from .adapters import HttpRobotAdapter, MqttRobotAdapter, Ros2RobotAdapter, SerialRobotAdapter, SimRobotAdapter
+from .contracts import build_contract_adapter, run_adapter_contract
 from .default_skills import build_default_registry
+from .providers import OpenAICompatibleModelProvider, RuleModelProvider
 from .quickstart import print_report
+from .replay import print_replay
+from .robots import load_robot_profile, validate_robot_profile
 from .runtime import OpenEIRuntime
 from .skills import SkillRegistry
+
+
+def _build_provider(args: argparse.Namespace):
+    if getattr(args, "provider", "rule") == "openai":
+        return OpenAICompatibleModelProvider()
+    return RuleModelProvider()
 
 
 def _build_runtime(args: argparse.Namespace) -> OpenEIRuntime:
@@ -29,7 +39,14 @@ def _build_runtime(args: argparse.Namespace) -> OpenEIRuntime:
     else:
         adapter = SimRobotAdapter()
     adapter.connect()
-    return OpenEIRuntime(build_default_registry(), adapter)
+    robot_path = getattr(args, "robot", "robot.yaml")
+    robot_profile = load_robot_profile(robot_path) if robot_path and Path(robot_path).exists() else None
+    return OpenEIRuntime(
+        build_default_registry(),
+        adapter,
+        provider=_build_provider(args),
+        robot_profile=robot_profile,
+    )
 
 
 def _cmd_quickstart(args: argparse.Namespace) -> int:
@@ -121,6 +138,43 @@ class CustomRobotAdapter(RobotAdapter):
     return 0
 
 
+def _cmd_adapter_test(args: argparse.Namespace) -> int:
+    adapter = build_contract_adapter(args.adapter, url=args.url, broker=args.broker)
+    report = run_adapter_contract(adapter)
+    print(f"适配器契约测试: {report.adapter_name}")
+    for check in report.checks:
+        status = "通过" if check.success else "失败"
+        detail = f" - {check.message}" if check.message else ""
+        print(f"{status}: {check.name}{detail}")
+    return 0 if report.success else 1
+
+
+def _cmd_robot_validate(args: argparse.Namespace) -> int:
+    errors = validate_robot_profile(args.path)
+    if errors:
+        for error in errors:
+            print(f"错误: {error}")
+        return 1
+    print("机器人描述校验通过")
+    return 0
+
+
+def _cmd_robot_show(args: argparse.Namespace) -> int:
+    profile = load_robot_profile(args.path)
+    print(f"名称: {profile.name}")
+    print(f"能力: {', '.join(profile.capabilities)}")
+    print(f"最大任务时长: {profile.limits.max_duration_seconds} 秒")
+    print(f"安全停止技能: {profile.limits.safe_stop_skill}")
+    print(f"适配器: {', '.join(profile.adapter_names())}")
+    print(f"技能包: {', '.join(profile.skill_packages)}")
+    return 0
+
+
+def _cmd_replay(args: argparse.Namespace) -> int:
+    print_replay(args.path)
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="openei", description="OpenEI 具身 Agent 运行时")
     sub = parser.add_subparsers(dest="command", required=True)
@@ -132,6 +186,8 @@ def build_parser() -> argparse.ArgumentParser:
         cmd.add_argument("--adapter", choices=["sim", "serial", "http", "mqtt", "ros2"], default="sim")
         cmd.add_argument("--url", default="mock://robot")
         cmd.add_argument("--broker", default="mock://local")
+        cmd.add_argument("--provider", choices=["rule", "openai"], default="rule")
+        cmd.add_argument("--robot", default="robot.yaml")
         cmd.set_defaults(func=handler)
 
     skill = sub.add_parser("skill")
@@ -155,6 +211,24 @@ def build_parser() -> argparse.ArgumentParser:
     create.add_argument("name")
     create.add_argument("--force", action="store_true")
     create.set_defaults(func=_cmd_adapter_create)
+    test = adapter_sub.add_parser("test")
+    test.add_argument("--adapter", choices=["sim", "serial", "http", "mqtt"], default="sim")
+    test.add_argument("--url", default="mock://robot")
+    test.add_argument("--broker", default="mock://local")
+    test.set_defaults(func=_cmd_adapter_test)
+
+    robot = sub.add_parser("robot")
+    robot_sub = robot.add_subparsers(dest="robot_command", required=True)
+    validate = robot_sub.add_parser("validate")
+    validate.add_argument("path")
+    validate.set_defaults(func=_cmd_robot_validate)
+    show = robot_sub.add_parser("show")
+    show.add_argument("path")
+    show.set_defaults(func=_cmd_robot_show)
+
+    replay = sub.add_parser("replay")
+    replay.add_argument("path")
+    replay.set_defaults(func=_cmd_replay)
 
     return parser
 

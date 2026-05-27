@@ -20,6 +20,14 @@ logs/openei_audit.jsonl
 
 ## 回放
 
+```bash
+python -m openei replay logs/openei_audit.jsonl
+```
+
+输出会按时间顺序展示任务解析、技能序列、技能完成、任务结果、失败原因和恢复动作。回放只读取日志，不重新执行任务，也不会触发硬件。
+
+需要在代码中读取日志时，可以使用：
+
 ```python
 from openei import replay_events
 

@@ -7,6 +7,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import List, Optional
 
+from .robots import RobotProfile
 from .skills import Skill, SkillRegistry
 from .tasks import RiskLevel, SafetyPolicy, Task, TaskStatus
 
@@ -21,10 +22,15 @@ class SkillPlan:
 class SafetyEvaluator:
     """Applies low-cost safety gates before execution."""
 
+    def __init__(self, robot_profile: Optional[RobotProfile] = None) -> None:
+        self.robot_profile = robot_profile
+
     def evaluate(self, task: Task) -> List[str]:
         warnings: List[str] = []
         duration = float(task.parameters.get("duration_seconds", 0))
         max_duration = float(task.constraints.get("max_duration_seconds", duration or 0))
+        if self.robot_profile is not None:
+            max_duration = min(max_duration or duration, self.robot_profile.limits.max_duration_seconds)
         if duration <= 0:
             warnings.append("任务时长必须大于 0")
         if max_duration and duration > max_duration:
@@ -37,9 +43,15 @@ class SafetyEvaluator:
 class RulePlanner:
     """Default planner for low-cost robots and quickstarts."""
 
-    def __init__(self, registry: SkillRegistry, safety: Optional[SafetyEvaluator] = None) -> None:
+    def __init__(
+        self,
+        registry: SkillRegistry,
+        safety: Optional[SafetyEvaluator] = None,
+        robot_profile: Optional[RobotProfile] = None,
+    ) -> None:
         self.registry = registry
-        self.safety = safety or SafetyEvaluator()
+        self.robot_profile = robot_profile
+        self.safety = safety or SafetyEvaluator(robot_profile)
 
     def plan(self, task: Task) -> SkillPlan:
         warnings = self.safety.evaluate(task)
@@ -49,7 +61,12 @@ class RulePlanner:
             return SkillPlan(task=task, skills=[], warnings=warnings + ["没有匹配到技能"])
 
         duration_limit = float(task.parameters.get("duration_seconds", 10))
-        stand_skill = self.registry.get("motion.safe_stand") or self.registry.get("motion.立正")
+        safe_stop_name = (
+            self.robot_profile.limits.safe_stop_skill
+            if self.robot_profile is not None
+            else "motion.safe_stand"
+        )
+        stand_skill = self.registry.get(safe_stop_name) or self.registry.get("motion.safe_stand") or self.registry.get("motion.立正")
         candidates = [
             skill
             for skill in matched

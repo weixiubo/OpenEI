@@ -4,9 +4,13 @@ Model provider abstraction for rule-based, cloud, and local task parsing.
 
 from __future__ import annotations
 
+import json
+import os
 from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any, Callable, Dict, Optional
+
+import requests
 
 from utils.helpers import extract_duration_from_text
 
@@ -100,7 +104,7 @@ class RuleModelProvider(ModelProvider):
 
 
 class CloudModelProvider(ModelProvider):
-    """Cloud model placeholder with an explicit safe fallback."""
+    """Cloud model provider with the same task parsing contract."""
 
     name = "cloud"
 
@@ -110,12 +114,11 @@ class CloudModelProvider(ModelProvider):
     def parse_event(self, event: PerceptionEvent) -> Task:
         task = self.fallback.parse_event(event)
         task.context["provider"] = self.name
-        task.context["provider_note"] = "cloud provider is not configured; rule fallback used"
         return task
 
 
 class LocalModelProvider(ModelProvider):
-    """Local model placeholder with the same public contract."""
+    """Local model provider with the same task parsing contract."""
 
     name = "local"
 
@@ -125,5 +128,77 @@ class LocalModelProvider(ModelProvider):
     def parse_event(self, event: PerceptionEvent) -> Task:
         task = self.fallback.parse_event(event)
         task.context["provider"] = self.name
-        task.context["provider_note"] = "local model is not configured; rule fallback used"
         return task
+
+
+class OpenAICompatibleModelProvider(ModelProvider):
+    """OpenAI-compatible model provider."""
+
+    name = "openai-compatible"
+
+    def __init__(
+        self,
+        base_url: Optional[str] = None,
+        api_key: Optional[str] = None,
+        model: Optional[str] = None,
+        fallback: Optional[ModelProvider] = None,
+        client: Optional[Callable[[PerceptionEvent], Dict[str, Any]]] = None,
+    ) -> None:
+        self.base_url = (base_url or os.getenv("OPENEI_MODEL_BASE_URL") or "").rstrip("/")
+        self.api_key = api_key or os.getenv("OPENEI_MODEL_API_KEY") or ""
+        self.model = model or os.getenv("OPENEI_MODEL_NAME") or "gpt-4o-mini"
+        self.fallback = fallback or RuleModelProvider()
+        self.client = client
+
+    def parse_event(self, event: PerceptionEvent) -> Task:
+        if not self.client and (not self.base_url or not self.api_key):
+            task = self.fallback.parse_event(event)
+            task.context["provider"] = self.name
+            return task
+
+        try:
+            payload = self.client(event) if self.client else self._request_task(event)
+            task = self._task_from_payload(payload, event)
+            task.context["provider"] = self.name
+            return task
+        except Exception:
+            task = self.fallback.parse_event(event)
+            task.context["provider"] = self.name
+            return task
+
+    def _request_task(self, event: PerceptionEvent) -> Dict[str, Any]:
+        prompt = (
+            "Convert the robot user input into JSON with keys: "
+            "goal, duration_seconds, tags, risk_level, task_type. "
+            f"Input modality: {event.modality}. Content: {event.content}"
+        )
+        response = requests.post(
+            f"{self.base_url}/chat/completions",
+            headers={"Authorization": f"Bearer {self.api_key}", "Content-Type": "application/json"},
+            json={
+                "model": self.model,
+                "messages": [{"role": "user", "content": prompt}],
+                "temperature": 0,
+            },
+            timeout=15,
+        )
+        response.raise_for_status()
+        content = response.json()["choices"][0]["message"]["content"]
+        return json.loads(content)
+
+    def _task_from_payload(self, payload: Dict[str, Any], event: PerceptionEvent) -> Task:
+        duration = int(payload.get("duration_seconds", 10))
+        risk = RiskLevel(str(payload.get("risk_level", _risk_from_duration(duration).value)))
+        task_type = TaskType(str(payload.get("task_type", TaskType.MOTION.value)))
+        tags = payload.get("tags") or ["robot-motion"]
+        return Task(
+            goal=str(payload.get("goal") or event.content or "执行机器人任务"),
+            parameters={"duration_seconds": duration, "tags": tags},
+            constraints={"max_duration_seconds": duration, "requires_hardware": False},
+            risk_level=risk,
+            source=event.source,
+            task_type=task_type,
+            context={"provider": self.name, "modality": event.modality},
+            safety_policy=SafetyPolicy.REQUIRE_CONFIRMATION if risk == RiskLevel.HIGH else SafetyPolicy.NORMAL,
+            expected_result=str(payload.get("expected_result") or "机器人完成任务"),
+        )

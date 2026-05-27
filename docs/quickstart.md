@@ -46,5 +46,8 @@ OpenEI 五分钟模拟器
 - 修改任务文本，例如 `执行五秒`、`帮我执行 15 秒`。
 - 运行图像输入样例：`python -m openei quickstart --image examples/image_input/scene.jpg --task "根据画面执行安全动作"`。
 - 查看技能包：`python -m openei skill list`。
+- 校验机器人描述：`python -m openei robot validate robot.yaml`。
+- 验证适配器契约：`python -m openei adapter test --adapter sim`。
+- 回放审计日志：`python -m openei replay logs/openei_audit.jsonl`。
 - 查看 [技能开发](skills.md)，新增一个自己的机器人技能。
 - 查看 [机器人适配器](adapters.md)，把模拟执行换成真实硬件执行。

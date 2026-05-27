@@ -1,0 +1,24 @@
+name: OpenEI Reference Robot
+description: Low-cost embodied robot profile for OpenEI quickstarts
+capabilities:
+  - robot-motion
+  - gesture
+  - vision-trigger
+  - sensor-trigger
+limits:
+  max_duration_seconds: 60
+  safe_stop_skill: motion.safe_stand
+adapters:
+  - name: sim
+    mode: simulation
+  - name: serial
+    mode: hardware
+  - name: http
+    mode: http
+  - name: mqtt
+    mode: mqtt
+skill_packages:
+  - skill_packages/base_motion
+  - skill_packages/gesture_pack
+  - skill_packages/cruise_pack
+  - skill_packages/vision_trigger_pack
