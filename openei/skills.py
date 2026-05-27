@@ -101,7 +101,7 @@ def _load_manifest(path: Path) -> Dict[str, Any]:
         return json.loads(text)
     except json.JSONDecodeError as exc:
         raise ValueError(
-            f"{path} 需要使用 JSON 兼容的 skill.yaml 格式；当前未引入额外 YAML 依赖"
+            f"{path} 需要使用可直接解析的 skill.yaml 格式"
         ) from exc
 
 

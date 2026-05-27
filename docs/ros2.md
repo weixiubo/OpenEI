@@ -1,6 +1,6 @@
 # ROS 2 可选接入
 
-OpenEI 默认不依赖 ROS 2，避免新用户第一步就被复杂环境挡住。但 ROS 2 作为一等公民适配方向保留在 `Ros2RobotAdapter` 和 `examples/ros2_template/` 中。
+OpenEI 采用轻量核心加可选适配器的方式接入 ROS 2。`Ros2RobotAdapter` 和 `examples/ros2_template/` 提供面向 ROS 2 机器人的扩展入口。
 
 ## 使用方式
 

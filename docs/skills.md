@@ -1,6 +1,6 @@
 # 技能开发
 
-OpenEI 把机器人能力抽象成 `Skill`。技能可以先支持模拟执行，再逐步接入真实硬件。
+OpenEI 把机器人能力抽象成 `Skill`。同一个技能既可以在模拟器中验证，也可以通过适配器发送到真实硬件。
 
 ## 技能结构
 
@@ -44,7 +44,7 @@ registry.register(
 
 ## 声明式技能包
 
-技能包使用 `skill.yaml` 声明。当前实现采用 JSON 兼容 YAML 子集，避免默认引入额外依赖：
+技能包使用 `skill.yaml` 声明。该文件采用可直接解析的结构化写法：
 
 ```json
 {
@@ -70,22 +70,22 @@ python -m openei skill validate skill_packages/base_motion
 python -m openei skill list --package skill_packages/base_motion
 ```
 
-## 默认技能包
+## 内置技能包
 
-当前默认技能包来自 `data/actions.csv`。每一行动作元数据会被包装为一个 `Skill`：
+内置动作数据会被包装为统一的 `Skill`：
 
 - `seq` 写入 `metadata`，供串口适配器下发。
 - `time_ms` 转成 `duration_seconds`，供规划器估算时长。
-- `type`、`energy` 写入 `tags`，供后续任务匹配扩展。
+- `type`、`energy` 写入 `tags`，供任务匹配扩展。
 
-这样既保留原控制板动作编号，又能把历史动作库迁移进通用技能系统。仓库还提供 `skill_packages/` 下的官方技能包样例，用于演示生态化扩展方式。
+这样可以把控制板动作编号、技能元数据和运行时调度统一到同一套技能系统。仓库还提供 `skill_packages/` 下的官方技能包样例，用于展示生态化扩展方式。
 
 ## 匹配策略
 
-第一阶段的 `SkillRegistry.match(task)` 采用标签匹配：
+`SkillRegistry.match(task)` 采用标签匹配：
 
-- 默认匹配 `robot-motion`。
+- 未指定标签时匹配 `robot-motion`。
 - 如果 `task.parameters["skill"]` 指定了技能名，则优先精确匹配。
 - 如果 `task.parameters["tags"]` 指定了标签，则按标签查询技能。
 
-后续可以在不破坏技能接口的情况下加入模型规划、技能评分、风险过滤和上下文记忆。
+同一接口可以承接模型规划、技能评分、风险过滤和上下文记忆。

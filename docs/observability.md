@@ -2,7 +2,7 @@
 
 OpenEI 的运行时会把任务解析、规划、技能执行和结果写入 JSONL 审计日志。
 
-默认路径：
+日志路径：
 
 ```bash
 logs/openei_audit.jsonl

@@ -1,18 +1,18 @@
 # 模型提供方
 
-OpenEI 通过 `ModelProvider` 把输入事件解析为 `Task`。默认提供无密钥规则模式，保证新用户不配置模型也能跑通。
+OpenEI 通过 `ModelProvider` 把输入事件解析为 `Task`。内置规则模式无需密钥，适合本地验证和离线运行。
 
 ## 内置提供方
 
-- `RuleModelProvider`：默认规则解析，支持文本、语音转写、图像文件、传感器事件。
-- `CloudModelProvider`：云端模型占位实现，当前安全回退到规则模式。
-- `LocalModelProvider`：本地模型占位实现，当前安全回退到规则模式。
+- `RuleModelProvider`：规则解析，支持文本、语音转写、图像文件、传感器事件。
+- `CloudModelProvider`：云端模型接口，使用同一任务输出协议。
+- `LocalModelProvider`：本地模型接口，使用同一任务输出协议。
 
 ## 设计边界
 
 模型提供方只负责理解输入和生成任务，不直接控制机器人。机器人控制必须经过规划器、安全策略和适配器。
 
-## 后续扩展
+## 接入要求
 
 接入真实多模态模型时，应保持 `parse_event(event) -> Task` 接口稳定，并补充以下测试：
 

@@ -18,7 +18,7 @@ python -m openei quickstart --task "执行 10 秒"
 
 - 把文本输入标准化为 `PerceptionEvent`。
 - 从输入中解析时长约束并生成 `Task`。
-- 从默认技能包中匹配技能序列。
+- 从内置技能包中匹配技能序列。
 - 用 `SimRobotAdapter` 输出模拟硬件调用日志。
 - 返回 `ExecutionResult` 并写入审计日志。
 

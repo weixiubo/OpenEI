@@ -37,18 +37,18 @@ class RobotAdapter:
 模拟适配器用于无硬件快速验证：
 
 - 不连接真实机器人。
-- 不等待真实动作完成。
+- 不阻塞真实动作完成。
 - 输出技能名、控制序号、预计耗时和任务目标。
-- 适合作为新用户第一入口和持续集成测试入口。
+- 适合作为快速开始入口和持续集成测试入口。
 
 ### SerialRobotAdapter
 
-串口适配器包装当前已有串口控制逻辑：
+串口适配器负责把技能序列下发到串口控制板：
 
-- 复用 `dance.serial_driver.SerialDriver`。
+- 使用 `dance.serial_driver.SerialDriver`。
 - 从技能 `metadata["seq"]` 读取控制板动作序号。
 - 通过 `send_action_command(seq)` 下发到底层控制板。
-- 保留自动检测、真实模式、模拟模式等现有行为。
+- 支持自动检测、真实模式和模拟模式。
 
 ### HttpRobotAdapter
 
@@ -68,7 +68,7 @@ python -m openei run --adapter mqtt --broker mock://local --task "执行 5 秒"
 
 ### Ros2RobotAdapter
 
-ROS 2 不作为默认依赖，但保留可选适配器模板。详见 [ROS 2 可选接入](ros2.md)。
+ROS 2 通过可选适配器模板接入。详见 [ROS 2 可选接入](ros2.md)。
 
 ## 新机器人接入建议
 

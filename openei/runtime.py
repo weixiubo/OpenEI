@@ -107,7 +107,7 @@ class OpenEIRuntime:
 
         self.audit_logger.write("task.started", {"task": task, "adapter": self.adapter.status()})
         for index, skill in enumerate(skills, start=1):
-            trace.append(f"[计划] 第 {index} 步: {skill.name}")
+            trace.append(f"[执行序列] 第 {index} 步: {skill.name}")
             self.audit_logger.write("skill.started", {"task": task, "skill": skill.name})
             result = self.adapter.execute_skill(skill, task)
             trace.extend(result.trace)

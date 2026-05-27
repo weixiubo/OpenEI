@@ -15,7 +15,7 @@ python -m openei skill validate skill_packages/base_motion
 
 ## 设计要求
 
-- 保持默认快速开始不需要 API key 和真实硬件。
+- 保持快速开始不需要 API key 和真实硬件。
 - 新硬件必须提供模拟或 mock 路径。
 - 适配器必须支持 `stop()` 或 `emergency_stop()`。
 - 不提交真实密钥、日志和本地录音文件。

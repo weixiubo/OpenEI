@@ -1,6 +1,6 @@
 # OpenEI 架构说明
 
-OpenEI 的主线定位是轻量级具身 Agent 运行时。它不把机器人能力写死成单个脚本，而是拆成感知事件、模型提供方、任务中间表示、技能系统、执行运行时、安全策略、审计日志和硬件适配层。
+OpenEI 是轻量级具身 Agent 运行时。它不把机器人能力写死成单个脚本，而是拆成感知事件、模型提供方、任务中间表示、技能系统、执行运行时、安全策略、审计日志和硬件适配层。
 
 ## 分层结构
 
@@ -25,11 +25,11 @@ flowchart TB
 - `source`：输入来源，例如命令行、语音助手、摄像头、传感器。
 - `metadata`：置信度、时间戳、设备信息等扩展字段。
 
-当前仓库已有文本、语音、音频和图像文件入口。实时视觉和更多传感器后续可以通过同一个事件模型接入，不需要推翻运行时。
+OpenEI 提供文本、语音、音频和图像文件入口；实时视觉和传感器可以通过同一个事件模型接入运行时。
 
 ## 模型提供方
 
-`ModelProvider` 负责把 `PerceptionEvent` 转成 `Task`。默认 `RuleModelProvider` 不需要密钥；`CloudModelProvider` 和 `LocalModelProvider` 保持同一接口，当前安全回退到规则模式。
+`ModelProvider` 负责把 `PerceptionEvent` 转成 `Task`。`RuleModelProvider` 提供无密钥离线解析；`CloudModelProvider` 和 `LocalModelProvider` 使用同一任务接口承接云端模型和本地模型。
 
 ## 任务层
 
@@ -59,17 +59,17 @@ flowchart TB
 - `handler`：真实执行函数。
 - `simulator`：模拟执行函数。
 
-`SkillRegistry` 负责注册、查询、标签匹配和列出技能。当前默认技能包由 `data/actions.csv` 迁移而来，保留原 CSV 兼容路径。
+`SkillRegistry` 负责注册、查询、标签匹配和列出技能。内置动作数据和 `skill.yaml` 技能包会统一注册为 `Skill`。
 
 ## 运行时调度层
 
-`OpenEIRuntime` 当前实现的主流程：
+`OpenEIRuntime` 的主流程：
 
 ```text
 PerceptionEvent -> ModelProvider -> Task -> RulePlanner -> RobotAdapter -> ExecutionResult -> AuditLogger
 ```
 
-默认规划器采用轻量规则：从任务时长、技能标签、风险等级和安全策略中匹配可执行技能，组合成连续执行序列，并在最后追加归位类技能。后续可以替换为模型规划、规则引擎或学习型策略。
+内置规划器采用轻量规则：从任务时长、技能标签、风险等级和安全策略中匹配可执行技能，组合成连续执行序列，并在最后追加归位类技能。规划器接口也可以接入模型规划、规则引擎或学习型策略。
 
 ## 硬件适配层
 
@@ -84,9 +84,9 @@ PerceptionEvent -> ModelProvider -> Task -> RulePlanner -> RobotAdapter -> Execu
 内置适配器：
 
 - `SimRobotAdapter`：无硬件模拟完整闭环，并输出状态事件。
-- `SerialRobotAdapter`：包装现有串口控制逻辑，复用当前控制板动作序号。
+- `SerialRobotAdapter`：负责串口控制板动作序号下发。
 - `HttpRobotAdapter`：面向 REST 控制器或廉价网关。
 - `MqttRobotAdapter`：面向物联网控制板或远程机器人。
-- `Ros2RobotAdapter`：可选 ROS 2 模板，不进入默认依赖。
+- `Ros2RobotAdapter`：ROS 2 机器人适配模板，以可选依赖方式接入。
 
 这个边界让新机器人接入时只需要写适配器，不必重写任务层和技能层。
