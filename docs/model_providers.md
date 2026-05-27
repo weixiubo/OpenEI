@@ -22,6 +22,14 @@ python -m openei quickstart --provider openai --task "执行 10 秒"
 
 未配置环境变量时，命令仍会使用本地规则模式完成任务解析。
 
+## 命令行解析
+
+```bash
+python -m openei model parse --task "执行 10 秒" --provider rule
+python -m openei model parse --image examples/image_input/scene.jpg --task "根据画面执行安全动作" --provider rule
+python -m openei model parse --task "执行 10 秒" --provider rule --report reports/model.md
+```
+
 ## 设计边界
 
 模型提供方只负责理解输入和生成任务，不直接控制机器人。机器人控制必须经过规划器、安全策略和适配器。

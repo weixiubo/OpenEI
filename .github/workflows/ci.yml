@@ -18,5 +18,17 @@ jobs:
           python -m pip install -e ".[dev]"
       - name: Run tests
         run: python -m pytest -q
-      - name: Validate default skill package
-        run: python -m openei skill validate skill_packages/base_motion
+      - name: Run no-hardware acceptance
+        run: |
+          mkdir -p reports
+          python -m openei quickstart --task "执行 10 秒" --report reports/quickstart.md
+          python -m openei quickstart --image examples/image_input/scene.jpg --task "根据画面执行安全动作" --report reports/image.md
+          python -m openei scenario run examples/minimal_robot/scenario.json --report reports/minimal_robot.md
+          python -m openei model parse --task "执行 10 秒" --provider rule --report reports/model.md
+          python -m openei skill validate skill_packages/base_motion --report reports/base_motion.md
+          python -m openei skill validate examples/minimal_robot/skills --report reports/minimal_robot_skills.md
+          python -m openei robot validate robot.yaml --report reports/robot.md
+          python -m openei adapter test --adapter sim --report reports/adapter_sim.md
+          python -m openei adapter test --adapter http --url mock://robot --report reports/adapter_http.md
+          python -m openei adapter test --adapter mqtt --broker mock://local --report reports/adapter_mqtt.md
+          python -m openei replay logs/openei_audit.jsonl --report reports/replay.md

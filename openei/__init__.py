@@ -27,8 +27,10 @@ from .providers import (
     RuleModelProvider,
 )
 from .replay import print_replay, summarize_replay
+from .reports import write_report
 from .results import ExecutionResult, ExecutionStep
 from .runtime import OpenEIRuntime, RuntimeReport
+from .scenario import ScenarioRunReport, run_scenario
 from .robots import RobotAdapterSpec, RobotLimits, RobotProfile, load_robot_profile, validate_robot_profile
 from .skills import Skill, SkillContext, SkillPackage, SkillRegistry, load_skill_package
 from .tasks import RiskLevel, SafetyPolicy, Task, TaskStatus, TaskType
@@ -62,6 +64,7 @@ __all__ = [
     "RuntimeReport",
     "SafetyEvaluator",
     "SafetyPolicy",
+    "ScenarioRunReport",
     "SerialRobotAdapter",
     "SimRobotAdapter",
     "Skill",
@@ -76,7 +79,9 @@ __all__ = [
     "load_robot_profile",
     "print_replay",
     "run_adapter_contract",
+    "run_scenario",
     "replay_events",
     "summarize_replay",
     "validate_robot_profile",
+    "write_report",
 ]

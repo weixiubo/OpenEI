@@ -6,4 +6,4 @@ include requirements.txt
 recursive-include data *.csv
 recursive-include skill_packages skill.yaml
 recursive-include docs *.md *.txt
-recursive-include examples *.py *.md
+recursive-include examples *.py *.md *.json *.yaml

@@ -156,7 +156,10 @@ def validate_robot_profile(path: str | Path = "robot.yaml") -> List[str]:
             errors.append(f"适配器缺少模式: {adapter.name}")
 
     for package in profile.skill_packages:
-        if not Path(package).exists():
+        package_path = Path(package)
+        if not package_path.is_absolute():
+            package_path = profile_path.parent / package_path
+        if not package_path.exists():
             errors.append(f"技能包路径不存在: {package}")
 
     return errors

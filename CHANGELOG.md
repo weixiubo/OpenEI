@@ -1,5 +1,30 @@
 # 更新记录
 
+## v0.2.0
+
+`v0.2.0` 强化无硬件开发体验，让开发者可以通过报告、场景、模板和持续集成验证技能、适配器和任务链路。
+
+### 新增能力
+
+- 报告输出：`quickstart`、`skill validate`、`adapter test`、`robot validate`、`replay` 支持 Markdown 和 JSON 报告。
+- 场景运行器：`scenario run` 可以加载任务、机器人描述、技能包、适配器和期望结果，形成可重复验收场景。
+- 最小机器人工程：`examples/minimal_robot` 提供机器人描述、技能包、自定义适配器、场景文件和教程。
+- 模型解析命令：`model parse` 支持文本和图像任务解析。
+- 模板生成：`skill create` 和 `adapter create --kind` 生成可校验、可测试的扩展模板。
+- 持续集成：覆盖测试、快速开始、图像任务、样板场景、模型解析、技能校验、机器人校验、适配器契约和审计回放。
+
+### 验收命令
+
+```bash
+python -m pytest -q
+python -m openei quickstart --task "执行 10 秒" --report reports/quickstart.md
+python -m openei scenario run examples/minimal_robot/scenario.json --report reports/minimal_robot.md
+python -m openei model parse --task "执行 10 秒" --provider rule
+python -m openei skill validate examples/minimal_robot/skills --report reports/skills.md
+python -m openei adapter test --adapter sim --report reports/adapter.md
+python -m openei replay logs/openei_audit.jsonl --report reports/replay.md
+```
+
 ## v0.1.0-alpha
 
 `v0.1.0-alpha` 固化 OpenEI 的轻量级具身 Agent 运行时能力，面向低成本真实机器人和无硬件开发场景提供稳定入口。

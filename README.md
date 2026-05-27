@@ -22,7 +22,7 @@ flowchart LR
 
 ```bash
 pip install -r requirements.txt
-python -m openei quickstart --task "执行 10 秒"
+python -m openei quickstart --task "执行 10 秒" --report reports/quickstart.md
 ```
 
 示例输出：
@@ -56,7 +56,13 @@ SERIAL_PORT=/dev/ttyUSB0 python -m openei run --adapter serial --task "执行 10
 视觉输入样例：
 
 ```bash
-python -m openei quickstart --image examples/image_input/scene.jpg --task "根据画面执行安全动作"
+python -m openei quickstart --image examples/image_input/scene.jpg --task "根据画面执行安全动作" --report reports/image.md
+```
+
+完整样板工程：
+
+```bash
+python -m openei scenario run examples/minimal_robot/scenario.json --report reports/minimal_robot.md
 ```
 
 ## 为什么不是传统机器人脚本
@@ -83,12 +89,15 @@ python -m openei quickstart --image examples/image_input/scene.jpg --task "根�
 ```bash
 python -m openei quickstart --task "执行 10 秒"
 python -m openei run --adapter sim --task "执行 10 秒"
+python -m openei scenario run examples/minimal_robot/scenario.json --report reports/minimal_robot.md
+python -m openei model parse --task "执行 10 秒" --provider rule
 python -m openei skill list
 python -m openei skill validate skill_packages/base_motion
+python -m openei skill create my_skills
 python -m openei robot validate robot.yaml
 python -m openei adapter test --adapter sim
 python -m openei replay logs/openei_audit.jsonl
-python -m openei adapter create my_robot
+python -m openei adapter create my_robot --kind sim
 ```
 
 ## 常规启动
@@ -141,8 +150,10 @@ python main.py --profile demo --transport auto --recording-mode smart_vad
 - [快速开始](docs/quickstart.md)
 - [技能开发](docs/skills.md)
 - [机器人适配器](docs/adapters.md)
+- [场景运行](docs/scenarios.md)
 - [模型提供方](docs/model_providers.md)
 - [可观测性与审计](docs/observability.md)
+- [公开接口契约](docs/api_contracts.md)
 - [ROS 2 可选接入](docs/ros2.md)
 - [发布记录](CHANGELOG.md)
 - [长期路线](ROADMAP.md)

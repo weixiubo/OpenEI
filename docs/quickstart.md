@@ -11,7 +11,7 @@ pip install -r requirements.txt
 ## 2. 运行模拟器
 
 ```bash
-python -m openei quickstart --task "执行 10 秒"
+python -m openei quickstart --task "执行 10 秒" --report reports/quickstart.md
 ```
 
 这个命令会完成：
@@ -44,7 +44,8 @@ OpenEI 五分钟模拟器
 ## 4. 下一步
 
 - 修改任务文本，例如 `执行五秒`、`帮我执行 15 秒`。
-- 运行图像输入样例：`python -m openei quickstart --image examples/image_input/scene.jpg --task "根据画面执行安全动作"`。
+- 运行图像输入样例：`python -m openei quickstart --image examples/image_input/scene.jpg --task "根据画面执行安全动作" --report reports/image.md`。
+- 运行完整样板工程：`python -m openei scenario run examples/minimal_robot/scenario.json --report reports/minimal_robot.md`。
 - 查看技能包：`python -m openei skill list`。
 - 校验机器人描述：`python -m openei robot validate robot.yaml`。
 - 验证适配器契约：`python -m openei adapter test --adapter sim`。

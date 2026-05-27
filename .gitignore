@@ -30,6 +30,7 @@ env/
 *.temp
 *.log
 logs/
+reports/
 tmp/
 cache/
 *.jsonl

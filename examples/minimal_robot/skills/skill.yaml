@@ -1,0 +1,25 @@
+{
+  "name": "minimal-robot-skills",
+  "version": "0.1.0",
+  "description": "最小机器人工程技能包",
+  "skills": [
+    {
+      "name": "minimal.wave",
+      "description": "样板机器人执行安全问候动作",
+      "duration_seconds": 2.0,
+      "tags": ["robot-motion", "sample-action", "gesture"],
+      "risk_level": "low",
+      "adapter_requirements": ["any"],
+      "metadata": {"seq": "101", "category": "sample"}
+    },
+    {
+      "name": "minimal.safe_stand",
+      "description": "样板机器人回到安全姿态",
+      "duration_seconds": 1.0,
+      "tags": ["robot-motion", "safe-stop"],
+      "risk_level": "low",
+      "adapter_requirements": ["any"],
+      "metadata": {"seq": "100", "category": "safety"}
+    }
+  ]
+}

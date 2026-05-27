@@ -1,0 +1,13 @@
+name: Minimal Robot
+description: Minimal no-hardware robot profile for OpenEI development
+capabilities:
+  - robot-motion
+  - sample-action
+limits:
+  max_duration_seconds: 20
+  safe_stop_skill: minimal.safe_stand
+adapters:
+  - name: minimal
+    mode: simulation
+skill_packages:
+  - skills

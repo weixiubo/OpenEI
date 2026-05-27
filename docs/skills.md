@@ -67,8 +67,18 @@ registry.register(
 
 ```bash
 python -m openei skill validate skill_packages/base_motion
+python -m openei skill validate skill_packages/base_motion --report reports/base_motion.md
 python -m openei skill list --package skill_packages/base_motion
 ```
+
+## 创建技能包
+
+```bash
+python -m openei skill create my_skills
+python -m openei skill validate my_skills --report reports/my_skills.md
+```
+
+生成的 `skill.yaml` 可以直接校验和加载，再按机器人能力补充技能名称、标签、风险等级和硬件元数据。
 
 ## 内置技能包
 

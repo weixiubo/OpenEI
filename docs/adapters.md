@@ -79,9 +79,21 @@ python -m openei adapter test --adapter sim
 python -m openei adapter test --adapter http --url mock://robot
 python -m openei adapter test --adapter mqtt --broker mock://local
 python -m openei adapter test --adapter serial
+python -m openei adapter test --adapter sim --report reports/adapter.md
 ```
 
 串口契约测试使用模拟驱动，不依赖真实串口设备。
+
+## 创建适配器模板
+
+```bash
+python -m openei adapter create my_robot --kind sim
+python -m openei adapter create my_http_robot --kind http
+python -m openei adapter create my_mqtt_robot --kind mqtt
+python -m openei adapter create my_serial_robot --kind serial
+```
+
+生成的模板实现连接、状态、能力发现、技能执行、停止和关闭接口，可以直接接入契约测试。
 
 ## 新机器人接入建议
 
