@@ -133,4 +133,4 @@ def test_cli_skill_validate_and_quickstart(capsys):
     assert "校验通过" in capsys.readouterr().out
 
     assert cli_main(["quickstart", "--task", "执行 5 秒"]) == 0
-    assert "OpenEI 五分钟模拟器" in capsys.readouterr().out
+    assert "OpenEI 快速验证模拟器" in capsys.readouterr().out

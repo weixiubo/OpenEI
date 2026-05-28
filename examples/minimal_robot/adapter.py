@@ -20,8 +20,8 @@ class MinimalRobotAdapter(RobotAdapter):
 
     def discover_capabilities(self):
         return [
-            RobotCapability("robot-motion", "样板机器人运动能力", ["robot-motion"]),
-            RobotCapability("sample-action", "样板技能执行能力", ["sample-action"]),
+            RobotCapability("robot-motion", "参考机器人运动能力", ["robot-motion"]),
+            RobotCapability("sample-action", "参考技能执行能力", ["sample-action"]),
         ]
 
     def execute_skill(self, skill, task) -> ExecutionResult:
@@ -29,8 +29,8 @@ class MinimalRobotAdapter(RobotAdapter):
         result = skill.simulate(SkillContext(task=task, adapter=self))
         return ExecutionResult(
             success=result.success,
-            message=f"样板适配器已执行 {skill.name}",
-            trace=[f"[样板适配器] {skill.name}"] + result.trace,
+            message=f"参考适配器已执行 {skill.name}",
+            trace=[f"[参考适配器] {skill.name}"] + result.trace,
             error=result.error,
             recovery_actions=result.recovery_actions,
             structured_trace=result.structured_trace,

@@ -1,6 +1,6 @@
-# 五分钟快速开始
+# 快速开始
 
-本页目标是让新用户不接硬件、不配置密钥，也能跑通 OpenEI 的任务闭环。
+本页目标是让新用户在未接入实体硬件、未配置模型密钥时，也能跑通 OpenEI 的任务闭环。
 
 ## 1. 安装依赖
 
@@ -25,7 +25,7 @@ python -m openei quickstart --task "执行 10 秒" --report reports/quickstart.m
 ## 3. 预期输出
 
 ```text
-OpenEI 五分钟模拟器
+OpenEI 快速验证模拟器
 输入事件: text / 执行 10 秒
 任务目标: 执行 10 秒
 任务类型: motion
@@ -45,7 +45,7 @@ OpenEI 五分钟模拟器
 
 - 修改任务文本，例如 `执行五秒`、`帮我执行 15 秒`。
 - 运行图像输入样例：`python -m openei quickstart --image examples/image_input/scene.jpg --task "根据画面执行安全动作" --report reports/image.md`。
-- 运行完整样板工程：`python -m openei scenario run examples/minimal_robot/scenario.json --report reports/minimal_robot.md`。
+- 运行参考接入工程：`python -m openei scenario run examples/minimal_robot/scenario.json --report reports/minimal_robot.md`。
 - 查看技能包：`python -m openei skill list`。
 - 校验机器人描述：`python -m openei robot validate robot.yaml`。
 - 验证适配器契约：`python -m openei adapter test --adapter sim`。

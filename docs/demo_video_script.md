@@ -2,11 +2,11 @@
 
 ## 标题
 
-机器人版 OpenClaw：五分钟让 Agent 调用低成本机器人的身体能力
+OpenEI：低成本机器人具身智能体运行时
 
 ## 镜头顺序
 
-1. 打开仓库首页，展示一句话定位和五分钟命令。
+1. 打开仓库首页，展示项目定位和快速验证命令。
 2. 运行 `python -m openei quickstart --task "执行 10 秒"`，展示无硬件闭环。
 3. 运行 `python -m openei skill list`，展示技能包。
 4. 切到串口机器人，运行 `python -m openei run --adapter serial --task "执行 10 秒"`。
@@ -15,7 +15,7 @@
 
 ## 核心话术
 
-- OpenClaw 让 Agent 调用软件工具。
-- OpenEI 让 Agent 调用真实机器人的身体能力。
+- OpenEI 将多模态输入转化为可审计、可回放的机器人任务链路。
+- 同一运行时可覆盖模拟器、串口控制板和网络适配器。
 - 核心运行时保持轻量，ROS 2 通过适配器接入。
 - 需要 ROS 2 时，可以通过适配器接入。

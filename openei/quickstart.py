@@ -19,7 +19,7 @@ def build_parser() -> argparse.ArgumentParser:
 
 
 def print_report(report: RuntimeReport) -> None:
-    print("OpenEI 五分钟模拟器")
+    print("OpenEI 快速验证模拟器")
     print("=" * 32)
     print(f"输入事件: {report.event.modality} / {report.event.content}")
     print(f"任务目标: {report.task.goal}")

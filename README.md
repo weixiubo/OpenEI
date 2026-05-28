@@ -1,8 +1,6 @@
 # OpenEI
 
-OpenEI 是面向低成本真实机器人的轻量级具身 Agent 运行时。它把文本、语音、音频、视觉、传感器等输入统一成任务事件，再经过模型解析、任务规划、技能调度、安全约束和机器人适配器，变成真实或模拟机器人的身体能力调用。
-
-一句话定位：OpenClaw 让 Agent 调用软件工具，OpenEI 让 Agent 调用真实机器人的身体能力。
+OpenEI 是面向低成本实体机器人的轻量级具身智能体运行时。它将文本、语音、音频、视觉、传感器等输入统一为任务事件，并通过模型解析、任务规划、技能调度、安全约束和机器人适配器，完成从意图到模拟或实体机器人执行能力的闭环调度。
 
 ```mermaid
 flowchart LR
@@ -16,9 +14,9 @@ flowchart LR
     H --> C
 ```
 
-## 五分钟闭环
+## 快速验证
 
-不需要 API key，不需要真实硬件，先跑完整闭环：
+默认规则模式无需模型密钥或实体硬件，可直接运行完整任务闭环：
 
 ```bash
 pip install -r requirements.txt
@@ -28,7 +26,7 @@ python -m openei quickstart --task "执行 10 秒" --report reports/quickstart.m
 示例输出：
 
 ```text
-OpenEI 五分钟模拟器
+OpenEI 快速验证模拟器
 输入事件: text / 执行 10 秒
 任务目标: 执行 10 秒
 任务类型: motion
@@ -59,13 +57,13 @@ SERIAL_PORT=/dev/ttyUSB0 python -m openei run --adapter serial --task "执行 10
 python -m openei quickstart --image examples/image_input/scene.jpg --task "根据画面执行安全动作" --report reports/image.md
 ```
 
-完整样板工程：
+参考接入工程：
 
 ```bash
 python -m openei scenario run examples/minimal_robot/scenario.json --report reports/minimal_robot.md
 ```
 
-## 为什么不是传统机器人脚本
+## 与传统机器人脚本的区别
 
 传统脚本通常把“输入命令、动作编号、硬件通信”写成固定流程，换输入源、换模型、换机器人都要改主逻辑。OpenEI 的目标是把这几层拆开：
 

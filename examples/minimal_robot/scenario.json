@@ -10,13 +10,13 @@
   },
   "skill_packages": ["skills"],
   "task": {
-    "text": "执行样板机器人问候",
+    "text": "执行参考机器人问候",
     "parameters": {
       "skill": "minimal.wave",
       "duration_seconds": 4,
       "tags": ["sample-action"]
     },
-    "expected_result": "样板机器人完成问候并回到安全姿态"
+    "expected_result": "参考机器人完成问候并回到安全姿态"
   },
   "expect": {
     "success": true,

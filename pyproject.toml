@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "openei"
 version = "0.2.0a0"
-description = "Lightweight embodied agent runtime for low-cost real robots"
+description = "Lightweight embodied intelligence runtime for low-cost robots"
 requires-python = ">=3.10"
 readme = "README.md"
 authors = [{ name = "OpenEI Contributors" }]

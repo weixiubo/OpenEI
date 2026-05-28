@@ -1,8 +1,8 @@
 # 场景运行
 
-场景文件把任务、机器人描述、技能包、适配器和期望结果组合成一个可重复验收的开发闭环。它适合用来验证新技能、新适配器和样板工程。
+场景文件把任务、机器人描述、技能包、适配器和期望结果组合成一个可重复验收的开发闭环。它适合用来验证新技能、新适配器和参考接入工程。
 
-## 运行样板场景
+## 运行参考场景
 
 ```bash
 python -m openei scenario run examples/minimal_robot/scenario.json --report reports/minimal_robot.md
@@ -28,7 +28,7 @@ python -m openei scenario run examples/minimal_robot/scenario.json --report repo
   "adapter": {"type": "custom", "path": "adapter.py", "class": "MinimalRobotAdapter"},
   "skill_packages": ["skills"],
   "task": {
-    "text": "执行样板机器人问候",
+    "text": "执行参考机器人问候",
     "parameters": {"skill": "minimal.wave", "duration_seconds": 4}
   },
   "expect": {
