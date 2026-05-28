@@ -5,5 +5,5 @@ include robot.yaml
 include requirements.txt
 recursive-include data *.csv
 recursive-include skill_packages skill.yaml
-recursive-include docs *.md *.txt
+recursive-include docs *.md
 recursive-include examples *.py *.md *.json *.yaml
